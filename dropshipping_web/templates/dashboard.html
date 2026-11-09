@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+    .carousel-container { position: relative; overflow: hidden; }
+    .carousel-track {
+        display: flex; gap: 16px; overflow-x: auto; scroll-behavior: smooth;
+        padding: 10px 0; scrollbar-width: thin;
+    }
+    .carousel-track::-webkit-scrollbar { height: 6px; }
+    .carousel-track::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    .carousel-track::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+    .carousel-karti {
+        min-width: 220px; max-width: 220px; background: white; border-radius: 12px;
+        padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+        text-decoration: none; color: inherit; display: block;
+    }
+    .carousel-karti:hover {
+        transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .carousel-baslik {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 12px;
+    }
+    .tumu-link { font-size: 0.9rem; color: #007bff; text-decoration: none; }
+    .tumu-link:hover { text-decoration: underline; }
+    .kategori-bolum { margin-bottom: 40px; }
+    .fiyat-etiket { color: #B12704; font-weight: 700; font-size: 1.1rem; }
+    .bsr-etiket { color: #007600; font-size: 0.85rem; }
+    .yildizlar { color: #ffa41c; font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h3 class="mb-0"><i class="fas fa-fire me-2 text-danger"></i>Popüler Kategoriler</h3>
+        <p class="text-muted mb-0">Her kategorideki en çok satan ürünler</p>
+    </div>
+</div>
+
+{% for carousel in kategori_carouseller %}
+<div class="kategori-bolum">
+    <div class="carousel-baslik">
+        <h5 class="mb-0"><i class="fas fa-tag me-2 text-primary"></i>{{ carousel.kategori }}</h5>
+        <a target="_self" href="/kategori/{{ carousel.kategori }}" class="tumu-link">
+            Tümünü Gör <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i>
+        </a>
+    </div>
+    <div class="carousel-container">
+        <div class="carousel-track" id="carousel-{{ loop.index }}">
+            {% for urun in carousel.urunler %}
+            <a target="_self" href="/urun/{{ urun.asin }}" class="carousel-karti">
+                <div class="text-center mb-2">
+                    <i class="fas fa-box fa-3x text-muted"></i>
+                </div>
+                <h6 style="font-size: 0.85rem; line-height: 1.4; height: 2.8em; overflow: hidden; display: -webkit-box; line-clamp: 2; -webkit-box-orient: vertical;">
+                    {{ urun.title[:60] }}{% if urun.title|length > 60 %}...{% endif %}
+                </h6>
+                <div class="fiyat-etiket mb-1">₺{{ "%.2f"|format(urun.price) if urun.price else 'N/A' }}</div>
+                <div class="bsr-etiket mb-1 text-muted" style="font-size: 0.75rem;">Mevcut BSR: {{ urun.bsr }}</div>
+                            
+                {% if urun.tahmini_bsr %}
+                <div class="badge bg-primary bg-gradient w-100 py-1 mb-2 d-flex justify-content-between align-items-center px-2">
+                    <span><i class="fas fa-brain me-1"></i>Tahmin</span>
+                    <span class="fw-bold">{{ urun.tahmini_bsr }}</span>
+                </div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% if not kategori_carouseller %}
+<div class="alert alert-info text-center py-5">
+    <i class="fas fa-info-circle fa-2x mb-3"></i>
+    <p>Henüz kategori verisi bulunmuyor. Veritabanınızda ürün ekleyin.</p>
+</div>
+{% endif %}
+{% endblock %}

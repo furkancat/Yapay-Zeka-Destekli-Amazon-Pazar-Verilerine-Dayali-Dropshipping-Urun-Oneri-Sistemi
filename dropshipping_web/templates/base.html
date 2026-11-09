@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dropshipping Dashboard{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .navbar-brand { font-weight: 700; }
+        .kredi-badge {
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            color: #333;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .urun-karti {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .urun-karti:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .btn-detay {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            font-weight: 500;
+        }
+        .btn-detay:hover { color: white; opacity: 0.9; }
+        .grafik-kutu {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+<base target="_self">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a target="_self" class="navbar-brand" href="/dashboard"><i class="fas fa-chart-line me-2"></i>DropDash</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a target="_self" class="nav-link" href="/dashboard"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a target="_self" class="nav-link" href="/kategoriler"><i class="fas fa-th-large me-1"></i>Kategoriler</a></li>
+                    <li class="nav-item"><a target="_self" class="nav-link" href="/search"><i class="fas fa-search me-1"></i>Ürün Ara</a></li>
+                    {% if kullanici and kullanici.rol == 'admin' %}
+                    <li class="nav-item"><a target="_self" class="nav-link" href="/yonetici"><i class="fas fa-user-shield me-1"></i>Admin</a></li>
+                    {% endif %}
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    {% if kullanici %}
+                        <span class="kredi-badge"><i class="fas fa-coins me-1"></i><span id="kredi-miktari">{{ kullanici.kredi }}</span> Kredi</span>
+                        <span class="text-light"><i class="fas fa-user me-1"></i>{{ kullanici.kullanici_adi }}</span>
+                        <a target="_self" href="/cikis" class="btn btn-outline-light btn-sm">Çıkış</a>
+                    {% else %}
+                        <a target="_self" href="/login" class="btn btn-outline-light btn-sm">Giriş</a>
+                        <a target="_self" href="/kayit" class="btn btn-warning btn-sm">Kayıt Ol</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

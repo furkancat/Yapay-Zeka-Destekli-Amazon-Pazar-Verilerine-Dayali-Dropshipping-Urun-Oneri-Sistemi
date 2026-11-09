@@ -135,6 +135,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+*.pkl
+*.h5
+*.cbm
+*.model
 
 # Spyder project settings
 .spyderproject

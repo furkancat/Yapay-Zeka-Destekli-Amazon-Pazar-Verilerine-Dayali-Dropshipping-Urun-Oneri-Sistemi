@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Hata{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="card shadow-lg border-0" style="border-radius: 16px;">
+            <div class="card-body p-5">
+                <i class="fas fa-exclamation-triangle fa-4x text-warning mb-4"></i>
+                <h3 class="mb-3">İşlem Gerçekleştirilemedi</h3>
+                <p class="text-muted fs-5">{{ mesaj }}</p>
+                <div class="mt-4">
+                    <a target="_self" href="/dashboard" class="btn btn-primary me-2">Dashboard'a Dön</a>
+                    <a target="_self" href="/search" class="btn btn-outline-secondary">Aramaya Dön</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

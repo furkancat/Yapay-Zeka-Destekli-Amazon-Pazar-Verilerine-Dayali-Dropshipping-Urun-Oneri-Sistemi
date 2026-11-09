@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}{{ urun.title[:50] }} - Detay{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ai-card {
+        background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a target="_self" href="/dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item"><a target="_self" href="/search">Arama</a></li>
+                <li class="breadcrumb-item active">{{ urun.asin }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col-md-4 text-end">
+        <span class="badge bg-success fs-6"><i class="fas fa-coins me-1"></i>Kalan: {{ kullanici.kredi }} Kredi</span>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Ürün Bilgisi Kartı -->
+    <div class="col-md-7">
+        <div class="card shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body">
+                <span class="badge bg-primary mb-2">{{ urun.category or 'Kategorisiz' }}</span>
+                <h4 class="mb-2">{{ urun.title }}</h4>
+                <h3 class="text-success mb-4">₺{{ "%.2f"|format(urun.price) if urun.price else 'N/A' }}</h3>
+                <div class="row text-center g-2">
+                    <div class="col-4">
+                        <div class="p-2 bg-light rounded border">
+                            <h5 class="mb-0 text-primary">{{ urun.bsr or '-' }}</h5>
+                            <small class="text-muted">Mevcut BSR</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-light rounded border">
+                            <h5 class="mb-0 text-info">{{ urun.review_count or 0 }}</h5>
+                            <small class="text-muted">Yorum</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-light rounded border">
+                            <h5 class="mb-0 text-warning">{{ urun.asin }}</h5>
+                            <small class="text-muted">ASIN</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yapay Zeka (Ortak Akıl) Analiz Kartı -->
+    <div class="col-md-5">
+        <div class="card ai-card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-dark mb-4">
+                    <i class="fas fa-brain text-primary me-2"></i>7 gün sonraki tahmini BSR
+                </h5>
+                
+                {% if urun.ai %}
+                    <div class="d-flex flex-column align-items-center justify-content-center h-75">
+                        <h6 class="text-muted mb-2">Tahmini BSR (Sıralama)</h6>
+                        <div class="display-3 fw-bold text-primary mb-3">
+                            {{ urun.ai.tahmini_bsr }}
+                        </div>
+                        <span class="badge bg-white text-dark border px-3 py-2">
+                            <i class="fas fa-robot text-muted me-2"></i>Yapay Zeka Tahmini
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-hourglass-half fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">Bu ürün henüz Yapay Zeka motoru tarafından analiz edilmemiş veya geçmiş verisi yetersiz.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafikler -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="grafik-kutu">
+            <h5 class="mb-3"><i class="fas fa-turkish-lira-sign me-2 text-success"></i>Fiyat Geçmişi (Son 90 Gün)</h5>
+            <canvas id="fiyatGrafik"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="grafik-kutu">
+            <h5 class="mb-3"><i class="fas fa-trophy me-2 text-warning"></i>BSR Değişimi (Son 90 Gün)</h5>
+            <canvas id="bsrGrafik"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="grafik-kutu">
+            <h5 class="mb-3"><i class="fas fa-comments me-2 text-info"></i>Yorum Sayısı Artışı</h5>
+            <canvas id="yorumGrafik"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="grafik-kutu">
+            <h5 class="mb-3"><i class="fas fa-star me-2 text-warning"></i>Rating Değişimi</h5>
+            <canvas id="ratingGrafik"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 text-center">
+        <a target="_self" href="/search" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-1"></i>Aramaya Dön</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const tarihler = JSON.parse('{{ grafik_tarihler | safe }}');
+const fiyatlar = JSON.parse('{{ grafik_fiyatlar | safe }}');
+const bsrler = JSON.parse('{{ grafik_bsr | safe }}');
+const yorumlar = JSON.parse('{{ grafik_yorum | safe }}');
+const ratingler = JSON.parse('{{ grafik_rating | safe }}');
+
+const commonOptions = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+        x: { ticks: { maxTicksLimit: 8 } }
+    },
+    elements: {
+        line: { tension: 0 },
+        point: { radius: 3 }
+    }
+};
+
+new Chart(document.getElementById('fiyatGrafik'), {
+    type: 'line',
+    data: {
+        labels: tarihler,
+        datasets: [{
+            label: 'Fiyat (₺)',
+            data: fiyatlar,
+            borderColor: '#28a745',
+            backgroundColor: '#28a74520',
+            fill: true
+        }]
+    },
+    options: commonOptions
+});
+
+new Chart(document.getElementById('bsrGrafik'), {
+    type: 'line',
+    data: {
+        labels: tarihler,
+        datasets: [{
+            label: 'BSR',
+            data: bsrler,
+            borderColor: '#ffc107',
+            backgroundColor: '#ffc10720',
+            fill: true
+        }]
+    },
+    options: commonOptions
+});
+
+new Chart(document.getElementById('yorumGrafik'), {
+    type: 'line',
+    data: {
+        labels: tarihler,
+        datasets: [{
+            label: 'Yorum Sayısı',
+            data: yorumlar,
+            borderColor: '#17a2b8',
+            backgroundColor: '#17a2b820',
+            fill: true
+        }]
+    },
+    options: commonOptions
+});
+
+new Chart(document.getElementById('ratingGrafik'), {
+    type: 'line',
+    data: {
+        labels: tarihler,
+        datasets: [{
+            label: 'Rating',
+            data: ratingler,
+            borderColor: '#fd7e14',
+            backgroundColor: '#fd7e1420',
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { maxTicksLimit: 8 } },
+            y: { min: 0, max: 5 }
+        },
+        elements: {
+            line: { tension: 0 },
+            point: { radius: 3 }
+        }
+    }
+});
+</script>
+{% endblock %}

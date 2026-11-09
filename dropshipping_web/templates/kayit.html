@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Kayıt Ol{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0" style="border-radius: 16px;">
+            <div class="card-body p-5">
+                <h3 class="text-center mb-4"><i class="fas fa-user-plus me-2"></i>Kayıt Ol</h3>
+                <p class="text-muted text-center mb-4">Başlangıçta <strong>50 kredi</strong> hediye!</p>
+                <form action="/kayit" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input type="text" name="kullanici_adi" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">E-posta</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Şifre</label>
+                        <input type="password" name="sifre" class="form-control" required minlength="4">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2">Kayıt Ol</button>
+                </form>
+                <p class="text-center mt-3 mb-0">Zaten hesabın var mı? <a target="_self" href="/login">Giriş yap</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
