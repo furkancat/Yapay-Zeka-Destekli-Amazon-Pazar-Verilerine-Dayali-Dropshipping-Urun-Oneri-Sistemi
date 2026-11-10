@@ -6,6 +6,8 @@ Proje kapsamında Amazon.com.tr üzerinden günlük olarak veri toplayan bir web
 
 ## 🏗️ Sistem Mimarisi
 
+<img width="2528" height="1686" alt="Gemini_Generated_Image_cei2jzcei2jzcei2" src="https://github.com/user-attachments/assets/7907bba7-baca-4536-972d-a51ce3093aed" />
+
 Sistem uçtan uca 3 ana modülden oluşmaktadır:
 
 1. **Veri Toplama (Web Scraping):** Playwright ve BeautifulSoup kullanılarak Amazon'dan dinamik olarak fiyat, BSR, yorum sayısı ve yıldız puanı toplanır.
